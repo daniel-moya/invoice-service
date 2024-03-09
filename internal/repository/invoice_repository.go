@@ -1,18 +1,14 @@
 package repository
 
-import (
-	// "invoice-service/internal/db"
-	"invoice-service/internal/entity"
-)
+import "invoice-service/internal/db"
+import "invoice-service/internal/entity"
 
 type InvoiceRepository struct {
-	// EntityManager *db.EntityManager
+	EntityManager *db.EntityManager
 }
 
-// func NewInvoiceRepository(em *db.EntityManager) (*InvoiceRepository, error) {
-func NewInvoiceRepository() (*InvoiceRepository, error) {
-	return &InvoiceRepository{}, nil
-	// return &InvoiceRepository{EntityManager: em}, nil
+func NewInvoiceRepository(em *db.EntityManager) (*InvoiceRepository, error) {
+	return &InvoiceRepository{EntityManager: em}, nil
 }
 
 func (ir *InvoiceRepository) CreateInvoice(i *entity.Invoice) *entity.Invoice {
@@ -20,7 +16,19 @@ func (ir *InvoiceRepository) CreateInvoice(i *entity.Invoice) *entity.Invoice {
 }
 
 func (ir *InvoiceRepository) GetAllInvoices() []entity.Invoice {
-	return []entity.Invoice{{Total: 23}}
+	invoices := []entity.Invoice{}
+
+	rows, _ := ir.EntityManager.DB.Query("SELECT * FROM invoices;")
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var cInvoice entity.Invoice
+		rows.Scan(&cInvoice.Id, &cInvoice.Name, &cInvoice.Archived, cInvoice.Position, &cInvoice.Total, &cInvoice.SubTotal)
+		invoices = append(invoices, cInvoice)
+	}
+
+	return invoices
 }
 
 func (ir *InvoiceRepository) GetInvoiceByID(id int) *entity.Invoice {
