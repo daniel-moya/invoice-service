@@ -1,0 +1,7 @@
+!#/usr/bin/env bash
+curl http://localhost:8080/invoices \
+--include \
+--header "Content-Type: application:json" \
+--request "POST" \
+--data '{"name": "Invoice 1", "position": 1, "archived": false, "total": 107, "subTotal": 100, "description": "Invoice Description 1", "varPercentage": 7}'
+

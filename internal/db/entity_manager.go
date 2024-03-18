@@ -1,7 +1,11 @@
 package db
 
-import "database/sql"
-import "invoice-service/internal/config"
+import (
+	"database/sql"
+	"fmt"
+	_ "github.com/lib/pq"
+	"invoice-service/internal/config"
+)
 
 type EntityManager struct {
 	DB *sql.DB
@@ -9,13 +13,15 @@ type EntityManager struct {
 
 // NewEntityManager creates a new EntityManager with the provided database configuration.
 func NewEntityManager(config *config.DBConfig) (*EntityManager, error) {
-	db, err := sql.Open("mysql", config.Username+":"+config.Password+"@tcp("+config.Host+":"+config.Port+")/"+config.Database)
+	db, err := sql.Open("postgres", "postgresql://"+config.Username+":"+config.Password+"@"+config.Host+"/postgres?sslmode=disable")
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 

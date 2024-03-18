@@ -1,9 +1,13 @@
 package controller
 
-import "github.com/gin-gonic/gin"
-import "invoice-service/internal/service"
-import "invoice-service/internal/entity"
-import "net/http"
+import (
+	"errors"
+	"invoice-service/internal/entity"
+	"invoice-service/internal/service"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 // Handlers struct to hold handler functions
 type InvoiceController struct {
@@ -16,9 +20,9 @@ func NewInvoiceController(is *service.InvoiceService) (*InvoiceController, error
 
 // Define routes for CRUD operations
 func (h *InvoiceController) SetupRoutes(router *gin.Engine) {
-	router.POST("/invoices", h.CreateInvoice)
 	router.GET("/invoices", h.GetAllInvoices)
 	router.GET("/invoices/:id", h.GetInvoiceByID)
+	router.POST("/invoices", h.CreateInvoice)
 	router.PUT("/invoices", h.UpdateInvoice)
 	router.DELETE("/invoices", h.DeleteInvoice)
 }
@@ -33,12 +37,21 @@ func bindInvoice(c *gin.Context) *entity.Invoice {
 }
 
 func (h *InvoiceController) CreateInvoice(c *gin.Context) {
-	invoice := h.InvoiceService.CreateInvoice(bindInvoice(c))
+	invoice, error := h.InvoiceService.CreateInvoice(bindInvoice(c))
+	if error != nil {
+		c.IndentedJSON(http.StatusInternalServerError, errors.New("Create invoice failed"))
+	}
+
 	c.IndentedJSON(http.StatusOK, invoice)
 }
 
 func (h *InvoiceController) GetAllInvoices(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, h.InvoiceService.GetAll())
+	invoices, err := h.InvoiceService.GetAll()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Something went wrong")
+	}
+
+	c.IndentedJSON(http.StatusOK, invoices)
 }
 
 func (h *InvoiceController) GetInvoiceByID(c *gin.Context) {

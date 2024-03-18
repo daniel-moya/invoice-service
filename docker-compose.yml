@@ -1,8 +1,8 @@
 version: '3.8'
 services:
-  invoices_db:
+  db:
     image: postgres:latest
-    container_name: InvoiceDbContainer 
+    container_name: is-container 
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -11,7 +11,7 @@ services:
       - '5432:5432'
     volumes:
       - ./db:/docker-entrypoint-initdb.d
-      - invoices_db:/var/lib/postgresql/data
+      - is-volume:/var/lib/postgresql/data
 volumes:
-  invoices_db:
+  is-volume:
     driver: local

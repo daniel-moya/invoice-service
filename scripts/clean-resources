@@ -1,0 +1,4 @@
+!#usr/bin/env bash
+docker stop is-container \
+&& docker rm is-container \
+&& docker volume rm invoice-service_is-volume
