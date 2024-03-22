@@ -2,11 +2,12 @@ package controller
 
 import (
 	"errors"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"invoice-service/internal/entity"
 	"invoice-service/internal/service"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 // Handlers struct to hold handler functions
@@ -24,7 +25,7 @@ func (h *InvoiceController) SetupRoutes(router *gin.Engine) {
 	router.GET("/invoices/:id", h.GetInvoiceByID)
 	router.POST("/invoices", h.CreateInvoice)
 	router.PUT("/invoices", h.UpdateInvoice)
-	router.DELETE("/invoices", h.DeleteInvoice)
+	router.DELETE("/invoices/:id", h.DeleteInvoice)
 }
 
 func bindInvoice(c *gin.Context) *entity.Invoice {
@@ -55,10 +56,39 @@ func (h *InvoiceController) GetAllInvoices(c *gin.Context) {
 }
 
 func (h *InvoiceController) GetInvoiceByID(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	invoice, err := h.InvoiceService.GetInvoiceByID(id)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, errors.New("Getting invoice failed"))
+	}
+
+	c.IndentedJSON(http.StatusOK, invoice)
 }
 
 func (h *InvoiceController) UpdateInvoice(c *gin.Context) {
+	invoice, error := h.InvoiceService.UpdateInvoice(bindInvoice(c))
+
+	if error != nil {
+		fmt.Println(error)
+		c.IndentedJSON(http.StatusInternalServerError, errors.New("Failed to update invoice"))
+	}
+
+	c.IndentedJSON(http.StatusOK, invoice)
 }
 
 func (h *InvoiceController) DeleteInvoice(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, "Invalid param")
+	}
+
+	error := h.InvoiceService.DeleteInvoice(id)
+
+	if error != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Something went wrong trying do delete invoice")
+	}
+
+	c.IndentedJSON(http.StatusOK, "Invoice Deleted Successfully")
 }

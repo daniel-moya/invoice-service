@@ -1,7 +1,9 @@
 package service
 
-import "invoice-service/internal/entity"
-import "invoice-service/internal/repository"
+import (
+	"invoice-service/internal/entity"
+	"invoice-service/internal/repository"
+)
 
 type InvoiceService struct {
 	InvoiceRepository *repository.InvoiceRepository
@@ -19,7 +21,7 @@ func (ir *InvoiceService) GetAll() ([]entity.Invoice, error) {
 	return ir.InvoiceRepository.GetAllInvoices()
 }
 
-func (ir *InvoiceService) GetInvoiceByID(invoiceId int) (*entity.Invoice, error) {
+func (ir *InvoiceService) GetInvoiceByID(invoiceId int64) (*entity.Invoice, error) {
 	return ir.InvoiceRepository.GetInvoiceByID(invoiceId)
 }
 
@@ -27,6 +29,6 @@ func (ir *InvoiceService) UpdateInvoice(invoice *entity.Invoice) (*entity.Invoic
 	return ir.InvoiceRepository.UpdateInvoice(invoice)
 }
 
-func (ir *InvoiceService) DeleteInvoice(invoiceId int) error {
+func (ir *InvoiceService) DeleteInvoice(invoiceId int64) error {
 	return ir.InvoiceRepository.DeleteInvoice(invoiceId)
 }

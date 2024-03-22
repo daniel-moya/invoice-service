@@ -18,28 +18,31 @@ func NewInvoiceRepository(em *db.EntityManager, logger *logger.Logger) (*Invoice
 }
 
 func (ir *InvoiceRepository) CreateInvoice(invoice *entity.Invoice) (*entity.Invoice, error) {
-	newInvoice := &entity.Invoice{
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
+	now, err := time.Now().MarshalText()
 
-	_, err := ir.EntityManager.DB.Exec(
-		"INSERT INTO invoices (name, position, archived, created_at, updated_at, total, subtotal, description, vatpercentage) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-		newInvoice.Name,
-		newInvoice.Position,
-		newInvoice.Archived,
-		newInvoice.CreatedAt,
-		newInvoice.UpdatedAt,
-		newInvoice.Total,
-		newInvoice.SubTotal,
-		newInvoice.Description,
-		newInvoice.VatPercentage,
-	)
 	if err != nil {
 		return nil, errors.New("Failed to add new Task")
 
 	}
-	return &entity.Invoice{}, nil
+
+	_, error := ir.EntityManager.DB.Exec(
+		"INSERT INTO invoices (name, position, archived, created_at, updated_at, total, subtotal, description, vatpercentage) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+		invoice.Name,
+		invoice.Position,
+		invoice.Archived,
+		now,
+		now,
+		invoice.Total,
+		invoice.SubTotal,
+		invoice.Description,
+		invoice.VatPercentage,
+	)
+
+	if error != nil {
+		return nil, errors.New("Failed to add new Task")
+
+	}
+	return invoice, nil
 }
 
 func (ir *InvoiceRepository) GetAllInvoices() ([]entity.Invoice, error) {
@@ -63,14 +66,54 @@ func (ir *InvoiceRepository) GetAllInvoices() ([]entity.Invoice, error) {
 	return invoices, nil
 }
 
-func (ir *InvoiceRepository) GetInvoiceByID(id int) (*entity.Invoice, error) {
-	return nil, errors.New("method not implemented")
+func (ir *InvoiceRepository) GetInvoiceByID(id int64) (*entity.Invoice, error) {
+	var invoice entity.Invoice
+
+	err := ir.EntityManager.DB.QueryRow("SELECT id, name, position, archived, subtotal, total, vatpercentage, description FROM invoices WHERE id = ($1);", id).Scan(
+		&invoice.Id,
+		&invoice.Name,
+		&invoice.Position,
+		&invoice.Archived,
+		&invoice.SubTotal,
+		&invoice.Total,
+		&invoice.VatPercentage,
+		&invoice.Description,
+	)
+
+	if err != nil {
+		return nil, errors.New("Not found")
+
+	}
+
+	return &invoice, nil
 }
 
 func (ir *InvoiceRepository) UpdateInvoice(i *entity.Invoice) (*entity.Invoice, error) {
-	return nil, errors.New("method not implemented")
+	_, err := ir.EntityManager.DB.Exec(
+		"UPDATE invoices SET name = ($1), position = ($2), archived = ($3), total = ($4), subtotal = ($5), description = ($6), vatpercentage = ($7) WHERE id = ($8);",
+		i.Name,
+		i.Position,
+		i.Archived,
+		i.Total,
+		i.SubTotal,
+		i.Description,
+		i.VatPercentage,
+		i.Id,
+	)
+
+	if err != nil {
+		return nil, errors.New("Failed to update invoice")
+	}
+
+	return ir.GetInvoiceByID(int64(i.Id))
 }
 
-func (ir *InvoiceRepository) DeleteInvoice(id int) error {
-	return errors.New("method not implemented")
+func (ir *InvoiceRepository) DeleteInvoice(id int64) error {
+	_, err := ir.EntityManager.DB.Exec("DELETE FROM invoices WHERE id = ($1);", id)
+
+	if err != nil {
+		return errors.New("Failed to delete invoice " + string(id))
+	}
+
+	return nil
 }

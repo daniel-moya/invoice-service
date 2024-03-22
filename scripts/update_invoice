@@ -1,0 +1,7 @@
+!#/usr/bin/env bash
+curl http://localhost:8080/invoices \
+--include \
+--header "Content-Type: application:json" \
+--request "PUT" \
+--data '{"id": 1, "name": "Invoice Updated", "position": 1, "archived": true, "total": 121, "subTotal": 110, "description": "Updated Description", "varPercentage": 0.10}'
+

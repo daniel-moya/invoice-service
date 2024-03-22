@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Check if tmux session for my_project already exists
+if ! tmux has-session -t is 2>/dev/null; then
+    tmux new-session -d -s is -n
+    # Split window vertically and run htop
+    tmux split-window -v -t is:0 'vim .'
+    tmux resize-pane -D 10 is:0
+    # Split window horizontally and run tail -f /var/log/syslog
+    tmux split-window -h -t is:0  'vim .'
+fi
+# Attach to tmux session
+tmux attach-session -t is 
