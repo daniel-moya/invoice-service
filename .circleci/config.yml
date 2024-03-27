@@ -7,7 +7,7 @@ jobs:
   build:
     executor:
       name: go/default # Use the default executor from the orb
-      tag: '1.21.24'
+      tag: '1.19.2'
     steps:
       - checkout # checkout source code
       - go/load-cache # Load cached Go modules.
