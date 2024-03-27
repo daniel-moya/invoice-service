@@ -1,0 +1,17 @@
+version: 2.1
+
+orbs:
+  go: circleci/go@1.7.3
+
+jobs:
+  build: # this can be any name you choose
+    executor:
+      name: go/default # Use the default executor from the orb
+    steps:
+      - checkout # checkout source code
+      - go/load-cache # Load cached Go modules.
+      - go/mod-download # Run 'go mod download'.
+      - go/save-cache # Save Go modules to cache.
+      - persist_to_workspace:
+          root: ~/project
+          paths: .
