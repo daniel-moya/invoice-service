@@ -4,9 +4,10 @@ orbs:
   go: circleci/go@1.7.3
 
 jobs:
-  build: # this can be any name you choose
+  build:
     executor:
       name: go/default # Use the default executor from the orb
+      tag: '1.21.24'
     steps:
       - checkout # checkout source code
       - go/load-cache # Load cached Go modules.
