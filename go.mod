@@ -1,6 +1,6 @@
 module invoice-service
 
-go 1.21.4
+go 1.19.2
 
 require github.com/gin-gonic/gin v1.9.1
 
