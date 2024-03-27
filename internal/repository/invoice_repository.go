@@ -48,7 +48,7 @@ func (ir *InvoiceRepository) CreateInvoice(invoice *entity.Invoice) (*entity.Inv
 func (ir *InvoiceRepository) GetAllInvoices() ([]entity.Invoice, error) {
 	invoices := []entity.Invoice{}
 
-	rows, err := ir.EntityManager.DB.Query("SELECT id FROM invoices;")
+	rows, err := ir.EntityManager.DB.Query("SELECT id, name, position, archived, created_at, updated_at, total, subtotal, description, vatpercentage FROM invoices;")
 
 	defer rows.Close()
 
@@ -59,7 +59,18 @@ func (ir *InvoiceRepository) GetAllInvoices() ([]entity.Invoice, error) {
 
 	for rows.Next() {
 		var cInvoice entity.Invoice
-		rows.Scan(&cInvoice.Id)
+		rows.Scan(
+			&cInvoice.Id,
+			&cInvoice.Name,
+			&cInvoice.Position,
+			&cInvoice.Archived,
+			&cInvoice.CreatedAt,
+			&cInvoice.UpdatedAt,
+			&cInvoice.Total,
+			&cInvoice.SubTotal,
+			&cInvoice.Description,
+			&cInvoice.VatPercentage,
+		)
 		invoices = append(invoices, cInvoice)
 	}
 
@@ -69,11 +80,13 @@ func (ir *InvoiceRepository) GetAllInvoices() ([]entity.Invoice, error) {
 func (ir *InvoiceRepository) GetInvoiceByID(id int64) (*entity.Invoice, error) {
 	var invoice entity.Invoice
 
-	err := ir.EntityManager.DB.QueryRow("SELECT id, name, position, archived, subtotal, total, vatpercentage, description FROM invoices WHERE id = ($1);", id).Scan(
+	err := ir.EntityManager.DB.QueryRow("SELECT id, name, position, archived, created_at, updated_at, subtotal, total, vatpercentage, description FROM invoices WHERE id = ($1);", id).Scan(
 		&invoice.Id,
 		&invoice.Name,
 		&invoice.Position,
 		&invoice.Archived,
+		&invoice.CreatedAt,
+		&invoice.UpdatedAt,
 		&invoice.SubTotal,
 		&invoice.Total,
 		&invoice.VatPercentage,
@@ -90,7 +103,7 @@ func (ir *InvoiceRepository) GetInvoiceByID(id int64) (*entity.Invoice, error) {
 
 func (ir *InvoiceRepository) UpdateInvoice(i *entity.Invoice) (*entity.Invoice, error) {
 	_, err := ir.EntityManager.DB.Exec(
-		"UPDATE invoices SET name = ($1), position = ($2), archived = ($3), total = ($4), subtotal = ($5), description = ($6), vatpercentage = ($7) WHERE id = ($8);",
+		"UPDATE invoices SET name = ($1), position = ($2), archived = ($3), total = ($4), subtotal = ($5), description = ($6), vatpercentage = ($7) , updated_at = ($8) WHERE id = ($9);",
 		i.Name,
 		i.Position,
 		i.Archived,
@@ -98,6 +111,7 @@ func (ir *InvoiceRepository) UpdateInvoice(i *entity.Invoice) (*entity.Invoice, 
 		i.SubTotal,
 		i.Description,
 		i.VatPercentage,
+		time.Now(),
 		i.Id,
 	)
 
@@ -112,7 +126,7 @@ func (ir *InvoiceRepository) DeleteInvoice(id int64) error {
 	_, err := ir.EntityManager.DB.Exec("DELETE FROM invoices WHERE id = ($1);", id)
 
 	if err != nil {
-		return errors.New("Failed to delete invoice " + string(id))
+		return errors.New("Failed to delete invoice")
 	}
 
 	return nil
